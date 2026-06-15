@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}<title>Painel Admin - Uai Odonto</title>{% endblock %}
+{% block content %}
+<div class="min-h-screen bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-blue-900">Painel de Agendamentos</h1>
+            <a href="/" class="text-blue-600 hover:underline bg-white px-4 py-2 rounded-lg shadow">← Voltar ao Site</a>
+        </div>
+
+        <!-- Cards de Estatísticas -->
+        <div class="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="text-gray-600 text-sm">Total Agendamentos</h3>
+                <p class="text-2xl font-bold text-blue-900">{{ appointments|length }}</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="text-gray-600 text-sm">Pendentes</h3>
+                <p class="text-2xl font-bold text-orange-500">{% set pending = appointments | selectattr('status', 'equalto', 'pendente') | list %}{{ pending|length }}</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="text-gray-600 text-sm">Confirmados</h3>
+                <p class="text-2xl font-bold text-green-500">{% set confirmed = appointments | selectattr('status', 'equalto', 'confirmado') | list %}{{ confirmed|length }}</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="text-gray-600 text-sm">Profissionais</h3>
+                <p class="text-2xl font-bold text-cyan-500">{{ professionals|length }}</p>
+            </div>
+        </div>
+
+        <!-- Tabela de Agendamentos -->
+        <div class="bg-white rounded-lg shadow overflow-x-auto">
+            <table class="min-w-full leading-normal">
+                <thead>
+                    <tr>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase">Data/Hora</th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase">Paciente</th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase">Contato</th>
+                        <th class="px-5 py-3 border-b-2 border-gray-500 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase">Observação</th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appt in appointments %}
+                    <tr>
+                        <td class="px-5 py-5 border-b border-gray-200 text-sm">{{ appt.data_consulta.strftime('%d/%m/%Y') }} {{ appt.hora_consulta.strftime('%H:%M') if appt.hora_consulta else '-' }}</td>
+                        <td class="px-5 py-5 border-b border-gray-200 text-sm font-medium">{{ appt.paciente.nome if appt.paciente else 'N/A' }}</td>
+                        <td class="px-5 py-5 border-b border-gray-200 text-sm">{{ appt.paciente.telefone if appt.paciente else 'N/A' }}</td>
+                        <td class="px-5 py-5 border-b border-gray-200 text-sm">{{ appt.observacao[:50] }}...</td>
+                        <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                            <span class="inline-block px-3 py-1 text-xs font-semibold rounded-full {% if appt.status == 'confirmado' %}bg-green-200 text-green-900{% else %}bg-orange-200 text-orange-900{% endif %} capitalize">
+                                {{ appt.status }}
+                            </span>
+                        </td>
+                        <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                            {% if appt.status != 'confirmado' %}
+                            <a href="/admin/approve/{{ appt.agendamento_id }}" class="text-green-600 hover:text-green-900 font-semibold">✔ Confirmar</a>
+                            {% else %}
+                            <span class="text-gray-400">Confirmado</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="px-5 py-5 text-center text-gray-500">Nenhum agendamento encontrado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
